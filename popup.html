@@ -5,15 +5,49 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Grasp</title>
   <link rel="stylesheet" href="styles.css">
-  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 <body>
-  <div id="app" x-data="graspApp()">
-    <div class="container">
-      <h1>Grasp</h1>
-      <p>Save this page for later</p>
+  <div class="container">
+    <h1>Grasp</h1>
+    
+    <!-- Current Tab Info -->
+    <div id="current-tab" class="current-tab" style="display: none;">
+      <h3>Current Page:</h3>
+      <p id="tab-title" class="tab-title"></p>
+      <p id="tab-url" class="tab-url"></p>
     </div>
+
+    <!-- Save Form -->
+    <form id="save-form" class="save-form">
+      <div class="form-group">
+        <label for="reason">Why are you saving this? *</label>
+        <textarea 
+          id="reason" 
+          placeholder="Enter your reason..."
+          required>
+        </textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="tag">Tag (optional)</label>
+        <input 
+          type="text" 
+          id="tag" 
+          placeholder="Add a tag...">
+      </div>
+
+      <button 
+        type="submit" 
+        id="save-btn"
+        class="save-btn">
+        Save
+      </button>
+    </form>
+
+    <!-- Status Messages -->
+    <div id="status-message" class="status" style="display: none;"></div>
   </div>
+  
   <script src="popup.js"></script>
 </body>
 </html>
