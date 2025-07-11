@@ -5,7 +5,8 @@
   "description": "Capture and save web pages with reasons and tags",
   "permissions": [
     "activeTab",
-    "storage"
+    "storage",
+    "scripting"
   ],
   "action": {
     "default_popup": "popup.html",
