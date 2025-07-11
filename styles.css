@@ -16,8 +16,23 @@ body {
 
 h1 {
   font-size: 18px;
-  margin-bottom: 16px;
+  margin-bottom: 8px;
   color: #333;
+}
+
+.header-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.saved-count {
+  font-size: 12px;
+  color: #666;
+  background: #f0f0f0;
+  padding: 4px 8px;
+  border-radius: 12px;
 }
 
 /* Current Tab Info */

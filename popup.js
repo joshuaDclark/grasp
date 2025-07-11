@@ -10,11 +10,13 @@ const reasonTextarea = document.getElementById('reason');
 const tagInput = document.getElementById('tag');
 const saveBtn = document.getElementById('save-btn');
 const statusMessage = document.getElementById('status-message');
+const savedCountSpan = document.getElementById('saved-count');
 
 // Initialize when DOM loads
 document.addEventListener('DOMContentLoaded', async () => {
   console.log('Grasp extension loaded');
   await getCurrentTab();
+  await updateSavedCount();
   setupEventListeners();
 });
 
@@ -45,6 +47,25 @@ function setupEventListeners() {
   });
   
   reasonTextarea.addEventListener('input', updateSaveButton);
+  
+  // Keyboard shortcuts
+  reasonTextarea.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault();
+      if (!saveBtn.disabled) {
+        saveBookmark();
+      }
+    }
+  });
+  
+  tagInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (!saveBtn.disabled) {
+        saveBookmark();
+      }
+    }
+  });
 }
 
 function updateSaveButton() {
@@ -92,6 +113,7 @@ async function saveBookmark() {
     
     showStatus('Page saved successfully!', 'success');
     resetForm();
+    await updateSavedCount();
     
   } catch (error) {
     console.error('Error saving bookmark:', error);
@@ -117,4 +139,15 @@ function resetForm() {
   reasonTextarea.value = '';
   tagInput.value = '';
   updateSaveButton();
+}
+
+async function updateSavedCount() {
+  try {
+    const result = await chrome.storage.local.get(['bookmarks']);
+    const bookmarks = result.bookmarks || [];
+    const count = bookmarks.length;
+    savedCountSpan.textContent = `${count} saved`;
+  } catch (error) {
+    console.error('Error updating saved count:', error);
+  }
 }
