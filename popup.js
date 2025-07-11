@@ -19,12 +19,24 @@ const saveContent = document.getElementById('save-content');
 const listContent = document.getElementById('list-content');
 const bookmarksList = document.getElementById('bookmarks-list');
 
+// Preview elements
+const linkPreview = document.getElementById('link-preview');
+const previewImage = document.getElementById('preview-image');
+const previewFavicon = document.getElementById('preview-favicon');
+const previewSiteName = document.getElementById('preview-site-name');
+const previewUrl = document.getElementById('preview-url');
+const previewTitle = document.getElementById('preview-title');
+const previewDescription = document.getElementById('preview-description');
+const previewAuthor = document.getElementById('preview-author');
+const previewDate = document.getElementById('preview-date');
+
 // Initialize when DOM loads
 document.addEventListener('DOMContentLoaded', async () => {
   console.log('Grasp extension loaded');
   await getCurrentTab();
   await updateSavedCount();
   setupEventListeners();
+  setupPreviewListeners();
 });
 
 async function getCurrentTab() {
@@ -203,12 +215,13 @@ async function loadBookmarksList() {
     }
     
     let html = '';
-    bookmarks.reverse().forEach((bookmark) => {
+    bookmarks.reverse().forEach((bookmark, index) => {
       const faviconUrl = bookmark.favicon || `https://www.google.com/s2/favicons?domain=${new URL(bookmark.url).hostname}&sz=32`;
       const hasImage = bookmark.featuredImage && bookmark.featuredImage !== '';
       
       html += `
-        <div class="bookmark-card" onclick="openBookmark('${bookmark.url}')">
+        <div class="bookmark-card" 
+             data-bookmark-index="${index}">
           ${hasImage ? `<div class="bookmark-image" style="background-image: url('${bookmark.featuredImage}')"></div>` : ''}
           <div class="bookmark-content">
             <div class="bookmark-header">
@@ -226,6 +239,24 @@ async function loadBookmarksList() {
     });
     
     bookmarksList.innerHTML = html;
+    
+    // Add event listeners for previews and clicks
+    const bookmarkCards = bookmarksList.querySelectorAll('.bookmark-card');
+    bookmarkCards.forEach((card, index) => {
+      const bookmark = bookmarks[index];
+      
+      card.addEventListener('click', () => {
+        openBookmark(bookmark.url);
+      });
+      
+      card.addEventListener('mouseenter', (e) => {
+        showLinkPreview(bookmark, e.currentTarget);
+      });
+      
+      card.addEventListener('mouseleave', () => {
+        hideLinkPreview();
+      });
+    });
     
   } catch (error) {
     console.error('Error loading bookmarks:', error);
@@ -334,4 +365,87 @@ function extractFeaturedImage() {
   }
   
   return metadata;
+}
+
+// Link Preview Functions
+let previewTimeout = null;
+
+function showLinkPreview(bookmark, cardElement) {
+  clearTimeout(previewTimeout);
+  
+  // Check if preview elements exist
+  if (!linkPreview || !previewFavicon || !previewTitle) {
+    console.error('Preview elements not found');
+    return;
+  }
+  
+  // Populate preview content
+  const faviconUrl = bookmark.favicon || `https://www.google.com/s2/favicons?domain=${new URL(bookmark.url).hostname}&sz=32`;
+  
+  // Set favicon
+  previewFavicon.src = faviconUrl;
+  
+  // Set site name and URL
+  previewSiteName.textContent = bookmark.siteName || new URL(bookmark.url).hostname.replace('www.', '');
+  previewUrl.textContent = bookmark.url;
+  
+  // Set title
+  previewTitle.textContent = bookmark.title;
+  
+  // Set description (fallback to reason if no description)
+  previewDescription.textContent = bookmark.description || bookmark.reason;
+  
+  // Set image
+  if (bookmark.featuredImage) {
+    previewImage.src = bookmark.featuredImage;
+    previewImage.style.display = 'block';
+  } else {
+    previewImage.style.display = 'none';
+  }
+  
+  // Set author and date
+  previewAuthor.textContent = bookmark.author || '';
+  
+  if (bookmark.publishedTime) {
+    previewDate.textContent = new Date(bookmark.publishedTime).toLocaleDateString();
+  } else {
+    previewDate.textContent = new Date(bookmark.timestamp).toLocaleDateString();
+  }
+  
+  // Position preview as overlay within popup bounds
+  const container = document.querySelector('.container');
+  const listContent = document.getElementById('list-content');
+  
+  // Simple overlay positioning - center the preview in the list area
+  linkPreview.style.position = 'absolute';
+  linkPreview.style.left = '20px';
+  linkPreview.style.top = '80px';
+  linkPreview.style.width = '310px';
+  linkPreview.style.maxWidth = '310px';
+  
+  // Show preview with shorter delay
+  previewTimeout = setTimeout(() => {
+    linkPreview.style.display = 'block';
+  }, 300);
+}
+
+function hideLinkPreview() {
+  clearTimeout(previewTimeout);
+  linkPreview.style.display = 'none';
+}
+
+function setupPreviewListeners() {
+  // Close preview when clicking outside
+  linkPreview.addEventListener('click', (e) => {
+    if (e.target === linkPreview) {
+      hideLinkPreview();
+    }
+  });
+  
+  // Close preview with Escape key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && linkPreview.style.display === 'block') {
+      hideLinkPreview();
+    }
+  });
 }

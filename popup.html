@@ -14,6 +14,8 @@
     </div>
     
     <!-- Tab Navigation -->
+
+
     <div class="tab-nav">
       <button id="save-tab" class="tab-btn active">Save Page</button>
       <button id="list-tab" class="tab-btn">List</button>
@@ -65,6 +67,30 @@
 
     <!-- Status Messages -->
     <div id="status-message" class="status" style="display: none;"></div>
+    
+    <!-- Link Preview Popup -->
+    <div id="link-preview" class="link-preview" style="display: none;">
+      <div class="preview-card">
+        <div class="preview-image-container">
+          <img id="preview-image" class="preview-image" src="" alt="Page preview">
+        </div>
+        <div class="preview-content">
+          <div class="preview-header">
+            <img id="preview-favicon" class="preview-favicon" src="" alt="Site icon">
+            <div class="preview-meta">
+              <div id="preview-site-name" class="preview-site-name"></div>
+              <div id="preview-url" class="preview-url"></div>
+            </div>
+          </div>
+          <h3 id="preview-title" class="preview-title"></h3>
+          <p id="preview-description" class="preview-description"></p>
+          <div class="preview-footer">
+            <span id="preview-author" class="preview-author"></span>
+            <span id="preview-date" class="preview-date"></span>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
   
   <script src="popup.js"></script>
