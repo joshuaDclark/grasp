@@ -103,9 +103,9 @@ async function saveBookmark() {
   saveBtn.disabled = true;
   
   try {
-    // Extract favicon and featured image
+    // Extract favicon and enhanced metadata
     const faviconUrl = await getFaviconUrl(currentTab.url);
-    const featuredImage = await getFeaturedImage();
+    const metadata = await getFeaturedImage();
     
     const bookmark = {
       id: Date.now().toString(),
@@ -115,7 +115,13 @@ async function saveBookmark() {
       tag: tag,
       timestamp: new Date().toISOString(),
       favicon: faviconUrl,
-      featuredImage: featuredImage
+      // Enhanced metadata for previews
+      featuredImage: metadata?.featuredImage || null,
+      description: metadata?.description || null,
+      siteName: metadata?.siteName || null,
+      publishedTime: metadata?.publishedTime || null,
+      author: metadata?.author || null,
+      contentType: metadata?.contentType || null
     };
 
     // Get existing bookmarks
@@ -243,38 +249,89 @@ async function getFaviconUrl(url) {
 
 async function getFeaturedImage() {
   try {
-    // Execute script in current tab to extract featured image
+    // Execute script in current tab to extract enhanced metadata
     const [result] = await chrome.scripting.executeScript({
       target: { tabId: currentTab.id },
       function: extractFeaturedImage
     });
     return result?.result || null;
   } catch (error) {
-    console.error('Error getting featured image:', error);
+    console.error('Error getting enhanced metadata:', error);
     return null;
   }
 }
 
 function extractFeaturedImage() {
+  // Extract metadata for enhanced previews
+  const metadata = {};
+  
   // Look for Open Graph image
   let ogImage = document.querySelector('meta[property="og:image"]');
   if (ogImage && ogImage.content) {
-    return ogImage.content;
+    metadata.featuredImage = ogImage.content;
   }
   
-  // Look for Twitter card image
-  let twitterImage = document.querySelector('meta[name="twitter:image"]');
-  if (twitterImage && twitterImage.content) {
-    return twitterImage.content;
-  }
-  
-  // Look for the first large image in the page
-  let images = document.querySelectorAll('img');
-  for (let img of images) {
-    if (img.width >= 200 && img.height >= 150 && img.src && !img.src.includes('logo')) {
-      return img.src;
+  // If no OG image, look for Twitter card image
+  if (!metadata.featuredImage) {
+    let twitterImage = document.querySelector('meta[name="twitter:image"]');
+    if (twitterImage && twitterImage.content) {
+      metadata.featuredImage = twitterImage.content;
     }
   }
   
-  return null;
+  // If still no image, look for the first large image in the page
+  if (!metadata.featuredImage) {
+    let images = document.querySelectorAll('img');
+    for (let img of images) {
+      if (img.width >= 200 && img.height >= 150 && img.src && !img.src.includes('logo')) {
+        metadata.featuredImage = img.src;
+        break;
+      }
+    }
+  }
+  
+  // Extract description
+  let ogDescription = document.querySelector('meta[property="og:description"]');
+  if (ogDescription && ogDescription.content) {
+    metadata.description = ogDescription.content;
+  } else {
+    let metaDescription = document.querySelector('meta[name="description"]');
+    if (metaDescription && metaDescription.content) {
+      metadata.description = metaDescription.content;
+    }
+  }
+  
+  // Extract site name
+  let ogSiteName = document.querySelector('meta[property="og:site_name"]');
+  if (ogSiteName && ogSiteName.content) {
+    metadata.siteName = ogSiteName.content;
+  } else {
+    // Fallback to domain name
+    metadata.siteName = window.location.hostname.replace('www.', '');
+  }
+  
+  // Extract article published time
+  let articleTime = document.querySelector('meta[property="article:published_time"]');
+  if (articleTime && articleTime.content) {
+    metadata.publishedTime = articleTime.content;
+  }
+  
+  // Extract author
+  let ogAuthor = document.querySelector('meta[property="article:author"]');
+  if (ogAuthor && ogAuthor.content) {
+    metadata.author = ogAuthor.content;
+  } else {
+    let authorMeta = document.querySelector('meta[name="author"]');
+    if (authorMeta && authorMeta.content) {
+      metadata.author = authorMeta.content;
+    }
+  }
+  
+  // Extract content type
+  let ogType = document.querySelector('meta[property="og:type"]');
+  if (ogType && ogType.content) {
+    metadata.contentType = ogType.content;
+  }
+  
+  return metadata;
 }
