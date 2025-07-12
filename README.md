@@ -2,6 +2,8 @@
 
 A Chrome browser extension for saving web pages with contextual tags and rich previews. Features automatic link expiration and organized bookmark management.
 
+![Main View](images/main_view.png)
+
 ## Features
 
 - **Quick Save**: Capture current tab with enhanced metadata (images, descriptions, author info)
@@ -13,11 +15,13 @@ A Chrome browser extension for saving web pages with contextual tags and rich pr
 
 ## Installation
 
-1. Download or clone this repository
+1. [Download](https://github.com/joshuaDclark/grasp/archive/refs/tags/1.0.0.zip) the zip package of this repository.
 2. Open Chrome and navigate to `chrome://extensions/`
 3. Enable "Developer mode" (top right toggle)
 4. Click "Load unpacked" and select the extension directory
 5. The Grasp icon will appear in your browser toolbar
+
+![Plugin Bar](images/plugin-bar.png)
 
 ## Usage
 
@@ -26,11 +30,17 @@ A Chrome browser extension for saving web pages with contextual tags and rich pr
 2. Add tags using the pill interface (space/comma creates pills)
 3. Click Save or press Ctrl/Cmd+Enter
 
+![Save Link](images/save_link.png)
+
 ### Managing Bookmarks
 - **List Tab**: View all saved bookmarks (expiring shown first)
 - **Expiring Tab**: Focus on links expiring within 3 days
 - **Hover Previews**: Hover over bookmark titles for rich previews
 - **Delete**: Click the × button on any bookmark card
+
+![Main List](images/main_list.png)
+
+![Expiring List](images/expiring_list.png)
 
 ## Technical Details
 
