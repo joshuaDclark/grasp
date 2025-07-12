@@ -1,6 +1,10 @@
 # Grasp - Chrome Extension
 
-A Chrome browser extension for saving web pages with contextual tags and rich previews. Features automatic link expiration and organized bookmark management.
+**Grasp** is a minimal Chrome extension that helps you save links intentionally — not just collect digital clutter.
+
+With one click, Grasp captures the current tab’s title and URL and stores it locally. Every link you save has a **14-day shelf life**. You’ll get a gentle reminder **3 days before it expires**, encouraging you to read, act, or let it go.
+
+Grasp isn’t about hoarding. It’s about giving you a chance to follow through — and then move on.
 
 ![Main View](images/main_view.png)
 
