@@ -35,10 +35,14 @@
       <form id="save-form" class="save-form">
         <div class="form-group">
           <label for="tag">Tag (optional)</label>
-          <input 
-            type="text" 
-            id="tag" 
-            placeholder="Add a tag...">
+          <div class="tag-input-container">
+            <div id="tag-pills" class="tag-pills"></div>
+            <input 
+              type="text" 
+              id="tag" 
+              class="tag-input"
+              placeholder="Press Enter to save pill">
+          </div>
         </div>
 
         <button 

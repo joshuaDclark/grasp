@@ -136,6 +136,102 @@ textarea, input[type="text"] {
   resize: vertical;
 }
 
+/* Tag Input Styles */
+.tag-input-container {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  min-height: 42px;
+  background: white;
+  cursor: text;
+  transition: border-color 0.2s;
+}
+
+.tag-input-container:focus-within {
+  border-color: #007AFF;
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+}
+
+
+.tag-input {
+  flex: 1;
+  min-width: 120px;
+  border: none;
+  outline: none;
+  padding: 0;
+  font-size: 14px;
+  font-family: inherit;
+  background: transparent;
+}
+
+.tag-input::placeholder {
+  color: #999;
+}
+
+.tag-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tag-pill {
+  display: inline-flex;
+  align-items: center;
+  background: linear-gradient(135deg, #007AFF, #0056CC);
+  color: white;
+  padding: 4px 8px 4px 10px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 600;
+  box-shadow: 0 2px 4px rgba(0, 122, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  animation: tagSlideIn 0.2s ease-out;
+}
+
+@keyframes tagSlideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.tag-pill-text {
+  margin-right: 6px;
+  max-width: 80px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tag-pill-remove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-left: 2px;
+}
+
+.tag-pill-remove:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
 textarea {
   min-height: 80px;
 }
@@ -262,13 +358,16 @@ textarea:focus, input:focus {
 }
 
 .bookmark-tag {
-  display: inline-block;
-  background: #007AFF;
+  display: inline-flex;
+  align-items: center;
+  background: linear-gradient(135deg, #007AFF, #0056CC);
   color: white;
-  padding: 3px 8px;
-  border-radius: 12px;
+  padding: 4px 10px;
+  border-radius: 16px;
   font-size: 11px;
-  font-weight: 500;
+  font-weight: 600;
+  box-shadow: 0 2px 4px rgba(0, 122, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 /* Status Messages */

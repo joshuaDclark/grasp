@@ -7,6 +7,8 @@ const tabTitle = document.getElementById('tab-title');
 const tabUrl = document.getElementById('tab-url');
 const saveForm = document.getElementById('save-form');
 const tagInput = document.getElementById('tag');
+const tagPills = document.getElementById('tag-pills');
+const tagInputContainer = document.querySelector('.tag-input-container');
 const saveBtn = document.getElementById('save-btn');
 const statusMessage = document.getElementById('status-message');
 const savedCountSpan = document.getElementById('saved-count');
@@ -231,12 +233,38 @@ function setupEventListeners() {
   listTabBtn.addEventListener('click', () => switchTab('list'));
   expiringTabBtn.addEventListener('click', () => switchTab('expiring'));
   
-  // Keyboard shortcuts
+  // Tag input handling  
+  tagInput.addEventListener('input', (e) => {
+    const value = e.target.value.trim();
+    // Create pill immediately when space or comma is typed
+    if (value.endsWith(' ') || value.endsWith(',')) {
+      const tagText = value.slice(0, -1).trim();
+      if (tagText) {
+        addTagPill(tagText);
+        tagInput.value = '';
+      }
+    }
+  });
+  
   tagInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
       e.preventDefault();
-      saveBookmark();
+      const value = tagInput.value.trim();
+      if (value) {
+        addTagPill(value);
+        tagInput.value = '';
+      } else {
+        saveBookmark();
+      }
+    } else if (e.key === 'Backspace' && !tagInput.value) {
+      // Remove last tag if input is empty and backspace is pressed
+      removeLastTagPill();
     }
+  });
+  
+  // Focus on tag input when container is clicked
+  tagInputContainer.addEventListener('click', () => {
+    tagInput.focus();
   });
 }
 
@@ -245,7 +273,7 @@ function updateSaveButton() {
 }
 
 async function saveBookmark() {
-  const tag = tagInput.value.trim();
+  const allTags = getAllTags();
   
   if (!currentTab) {
     showStatus('Error: No current tab found', 'error');
@@ -265,7 +293,7 @@ async function saveBookmark() {
       id: Date.now().toString(),
       title: currentTab.title,
       url: currentTab.url,
-      tag: tag,
+      tag: allTags,
       timestamp: new Date().toISOString(),
       favicon: faviconUrl,
       // Enhanced metadata for previews
@@ -311,8 +339,73 @@ function showStatus(message, type) {
   }, 3000);
 }
 
+// Tag pill management
+let currentTags = [];
+
+function addTagPill(tagText) {
+  // Prevent duplicates
+  if (currentTags.includes(tagText.toLowerCase())) {
+    return;
+  }
+  
+  currentTags.push(tagText.toLowerCase());
+  renderTagPills();
+}
+
+function removeTagPill(tagText) {
+  currentTags = currentTags.filter(tag => tag !== tagText.toLowerCase());
+  renderTagPills();
+}
+
+function removeLastTagPill() {
+  if (currentTags.length > 0) {
+    currentTags.pop();
+    renderTagPills();
+  }
+}
+
+function renderTagPills() {
+  tagPills.innerHTML = '';
+  
+  currentTags.forEach(tag => {
+    const pillElement = document.createElement('div');
+    pillElement.className = 'tag-pill';
+    pillElement.innerHTML = `
+      <span class="tag-pill-text">${tag}</span>
+      <span class="tag-pill-remove" data-tag="${tag}">×</span>
+    `;
+    
+    // Add click handler for remove button
+    const removeBtn = pillElement.querySelector('.tag-pill-remove');
+    removeBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      removeTagPill(tag);
+    });
+    
+    tagPills.appendChild(pillElement);
+  });
+  
+  // Update placeholder visibility
+  if (currentTags.length > 0) {
+    tagInput.placeholder = '';
+  } else {
+    tagInput.placeholder = 'Press Enter to save pill';
+  }
+}
+
+function getAllTags() {
+  const inputTag = tagInput.value.trim();
+  const allTags = [...currentTags];
+  if (inputTag && !allTags.includes(inputTag.toLowerCase())) {
+    allTags.push(inputTag.toLowerCase());
+  }
+  return allTags.join(', ');
+}
+
 function resetForm() {
   tagInput.value = '';
+  currentTags = [];
+  renderTagPills();
   updateSaveButton();
 }
 
