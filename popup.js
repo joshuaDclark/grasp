@@ -417,11 +417,28 @@ async function loadBookmarksList() {
       return;
     }
     
-    // Sort by expiration date - expiring soonest first
+    // Sort by status first (expiring before active), then by date
     const sortedBookmarks = validBookmarks.sort((a, b) => {
-      const daysA = getDaysUntilExpiration(a);
-      const daysB = getDaysUntilExpiration(b);
-      return daysA - daysB; // Ascending order (soonest first)
+      const statusA = getBookmarkStatus(a);
+      const statusB = getBookmarkStatus(b);
+      
+      // If both are expiring, sort by expiration date (soonest first)
+      if (statusA === 'expiring' && statusB === 'expiring') {
+        const daysA = getDaysUntilExpiration(a);
+        const daysB = getDaysUntilExpiration(b);
+        return daysA - daysB;
+      }
+      
+      // If both are active, sort by save date (most recent first)
+      if (statusA === 'active' && statusB === 'active') {
+        return new Date(b.timestamp) - new Date(a.timestamp);
+      }
+      
+      // Expiring bookmarks always come first
+      if (statusA === 'expiring' && statusB === 'active') return -1;
+      if (statusA === 'active' && statusB === 'expiring') return 1;
+      
+      return 0;
     });
     
     renderBookmarks(sortedBookmarks, bookmarksList, false);
