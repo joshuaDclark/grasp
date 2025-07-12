@@ -6,7 +6,6 @@ const currentTabDiv = document.getElementById('current-tab');
 const tabTitle = document.getElementById('tab-title');
 const tabUrl = document.getElementById('tab-url');
 const saveForm = document.getElementById('save-form');
-const reasonTextarea = document.getElementById('reason');
 const tagInput = document.getElementById('tag');
 const saveBtn = document.getElementById('save-btn');
 const statusMessage = document.getElementById('status-message');
@@ -81,7 +80,6 @@ function generateTestBookmarks() {
       id: 'test-1',
       title: 'Getting Started with React Hooks',
       url: 'https://reactjs.org/docs/hooks-intro.html',
-      reason: 'Need to learn hooks for upcoming project',
       tag: 'react',
       timestamp: new Date(Date.now() - (2 * 24 * 60 * 60 * 1000)).toISOString(), // 2 days ago
       favicon: 'https://www.google.com/s2/favicons?domain=reactjs.org&sz=32',
@@ -94,7 +92,6 @@ function generateTestBookmarks() {
       id: 'test-2',
       title: 'CSS Grid Complete Guide',
       url: 'https://css-tricks.com/snippets/css/complete-guide-grid/',
-      reason: 'Reference for responsive layouts',
       tag: 'css',
       timestamp: new Date(Date.now() - (5 * 24 * 60 * 60 * 1000)).toISOString(), // 5 days ago
       favicon: 'https://www.google.com/s2/favicons?domain=css-tricks.com&sz=32',
@@ -106,7 +103,6 @@ function generateTestBookmarks() {
       id: 'test-3',
       title: 'JavaScript Performance Optimization',
       url: 'https://developer.mozilla.org/en-US/docs/Web/Performance',
-      reason: 'Optimize app performance',
       tag: 'javascript',
       timestamp: new Date(Date.now() - (8 * 24 * 60 * 60 * 1000)).toISOString(), // 8 days ago
       favicon: 'https://www.google.com/s2/favicons?domain=developer.mozilla.org&sz=32',
@@ -119,7 +115,6 @@ function generateTestBookmarks() {
       id: 'test-4',
       title: 'Docker Best Practices',
       url: 'https://docs.docker.com/develop/best-practices/',
-      reason: 'Setting up containerization for deployment',
       tag: 'devops',
       timestamp: new Date(Date.now() - (12 * 24 * 60 * 60 * 1000)).toISOString(), // 12 days ago
       favicon: 'https://www.google.com/s2/favicons?domain=docs.docker.com&sz=32',
@@ -131,7 +126,6 @@ function generateTestBookmarks() {
       id: 'test-5',
       title: 'API Security Checklist',
       url: 'https://github.com/shieldfy/API-Security-Checklist',
-      reason: 'Security review for REST API',
       tag: 'security',
       timestamp: new Date(Date.now() - (13 * 24 * 60 * 60 * 1000)).toISOString(), // 13 days ago
       favicon: 'https://www.google.com/s2/favicons?domain=github.com&sz=32',
@@ -144,7 +138,6 @@ function generateTestBookmarks() {
       id: 'test-6',
       title: 'Old Tutorial - Outdated Framework',
       url: 'https://example.com/old-tutorial',
-      reason: 'Was learning this framework but moved on',
       tag: 'archived',
       timestamp: new Date(Date.now() - (16 * 24 * 60 * 60 * 1000)).toISOString(), // 16 days ago
       favicon: 'https://www.google.com/s2/favicons?domain=example.com&sz=32',
@@ -155,7 +148,6 @@ function generateTestBookmarks() {
       id: 'test-7',
       title: 'Expired Conference Link',
       url: 'https://oldconference.com/2024',
-      reason: 'Conference registration - already passed',
       tag: 'events',
       timestamp: new Date(Date.now() - (20 * 24 * 60 * 60 * 1000)).toISOString(), // 20 days ago
       favicon: 'https://www.google.com/s2/favicons?domain=oldconference.com&sz=32',
@@ -234,47 +226,27 @@ function setupEventListeners() {
     await saveBookmark();
   });
   
-  reasonTextarea.addEventListener('input', updateSaveButton);
-  
   // Tab switching
   saveTabBtn.addEventListener('click', () => switchTab('save'));
   listTabBtn.addEventListener('click', () => switchTab('list'));
   expiringTabBtn.addEventListener('click', () => switchTab('expiring'));
   
   // Keyboard shortcuts
-  reasonTextarea.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
-      e.preventDefault();
-      if (!saveBtn.disabled) {
-        saveBookmark();
-      }
-    }
-  });
-  
   tagInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
       e.preventDefault();
-      if (!saveBtn.disabled) {
-        saveBookmark();
-      }
+      saveBookmark();
     }
   });
 }
 
 function updateSaveButton() {
-  const hasReason = reasonTextarea.value.trim().length > 0;
-  saveBtn.disabled = !hasReason || isLoading;
+  saveBtn.disabled = isLoading;
 }
 
 async function saveBookmark() {
-  const reason = reasonTextarea.value.trim();
   const tag = tagInput.value.trim();
   
-  if (!reason) {
-    showStatus('Please enter a reason for saving this page', 'error');
-    return;
-  }
-
   if (!currentTab) {
     showStatus('Error: No current tab found', 'error');
     return;
@@ -293,7 +265,6 @@ async function saveBookmark() {
       id: Date.now().toString(),
       title: currentTab.title,
       url: currentTab.url,
-      reason: reason,
       tag: tag,
       timestamp: new Date().toISOString(),
       favicon: faviconUrl,
@@ -341,7 +312,6 @@ function showStatus(message, type) {
 }
 
 function resetForm() {
-  reasonTextarea.value = '';
   tagInput.value = '';
   updateSaveButton();
 }
@@ -523,7 +493,7 @@ function renderBookmarks(bookmarks, container, showExpiration = false) {
             <button class="delete-btn" title="Delete bookmark">×</button>
           </div>
           ${statusIndicator}
-          <p class="bookmark-reason">${bookmark.reason}</p>
+          ${bookmark.description ? `<p class="bookmark-reason">${bookmark.description}</p>` : ''}
           ${bookmark.tag ? `<span class="bookmark-tag">${bookmark.tag}</span>` : ''}
         </div>
       </div>
@@ -729,8 +699,8 @@ function showLinkPreview(bookmark, cardElement) {
   // Set title
   previewTitle.textContent = bookmark.title;
   
-  // Set description (fallback to reason if no description)
-  previewDescription.textContent = bookmark.description || bookmark.reason;
+  // Set description
+  previewDescription.textContent = bookmark.description || '';
   
   // Set image
   if (bookmark.featuredImage) {
