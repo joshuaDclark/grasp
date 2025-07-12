@@ -419,7 +419,7 @@ function showLinkPreview(bookmark, cardElement) {
   // Simple overlay positioning - center the preview in the list area
   linkPreview.style.position = 'absolute';
   linkPreview.style.left = '20px';
-  linkPreview.style.top = '80px';
+  linkPreview.style.top = '120px';
   linkPreview.style.width = '310px';
   linkPreview.style.maxWidth = '310px';
   
