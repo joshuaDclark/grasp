@@ -510,6 +510,7 @@ function renderBookmarks(bookmarks, container, showExpiration = false) {
     html += `
       <div class="bookmark-card ${status === 'expiring' ? 'expiring' : ''}" 
            data-bookmark-index="${index}"
+           data-bookmark-id="${bookmark.id}"
            data-status="${status}">
         ${hasImage ? `<div class="bookmark-image" style="background-image: url('${bookmark.featuredImage}')"></div>` : ''}
         <div class="bookmark-content">
@@ -519,6 +520,7 @@ function renderBookmarks(bookmarks, container, showExpiration = false) {
               <h4 class="bookmark-title">${bookmark.title}</h4>
               <small class="bookmark-date">${new Date(bookmark.timestamp).toLocaleDateString()} (${daysSinceSave} days ago)</small>
             </div>
+            <button class="delete-btn" title="Delete bookmark">×</button>
           </div>
           ${statusIndicator}
           <p class="bookmark-reason">${bookmark.reason}</p>
@@ -530,20 +532,32 @@ function renderBookmarks(bookmarks, container, showExpiration = false) {
   
   container.innerHTML = html;
   
-  // Add event listeners for previews and clicks
+  // Add event listeners for previews, clicks, and delete
   const bookmarkCards = container.querySelectorAll('.bookmark-card');
   bookmarkCards.forEach((card, index) => {
     const bookmark = bookmarks[index];
+    const deleteBtn = card.querySelector('.delete-btn');
     
-    card.addEventListener('click', () => {
-      openBookmark(bookmark.url);
+    // Open bookmark on card click (but not on delete button)
+    card.addEventListener('click', (e) => {
+      if (!e.target.classList.contains('delete-btn')) {
+        openBookmark(bookmark.url);
+      }
     });
     
-    card.addEventListener('mouseenter', (e) => {
+    // Delete bookmark on delete button click
+    deleteBtn.addEventListener('click', async (e) => {
+      e.stopPropagation(); // Prevent card click
+      await deleteBookmark(bookmark.id);
+    });
+    
+    // Add hover preview only to the title
+    const titleElement = card.querySelector('.bookmark-title');
+    titleElement.addEventListener('mouseenter', (e) => {
       showLinkPreview(bookmark, e.currentTarget);
     });
     
-    card.addEventListener('mouseleave', () => {
+    titleElement.addEventListener('mouseleave', () => {
       hideLinkPreview();
     });
   });
@@ -551,6 +565,44 @@ function renderBookmarks(bookmarks, container, showExpiration = false) {
 
 function openBookmark(url) {
   chrome.tabs.create({ url: url });
+}
+
+async function deleteBookmark(bookmarkId) {
+  try {
+    // Get current bookmarks
+    const result = await chrome.storage.local.get(['bookmarks']);
+    let bookmarks = result.bookmarks || [];
+    
+    // Find bookmark to get title for confirmation
+    const bookmarkToDelete = bookmarks.find(b => b.id === bookmarkId);
+    if (!bookmarkToDelete) {
+      showStatus('Bookmark not found', 'error');
+      return;
+    }
+    
+    // Remove bookmark from array
+    const updatedBookmarks = bookmarks.filter(bookmark => bookmark.id !== bookmarkId);
+    
+    // Save updated bookmarks
+    await chrome.storage.local.set({ bookmarks: updatedBookmarks });
+    
+    // Show success message
+    showStatus(`Deleted: ${bookmarkToDelete.title}`, 'success');
+    
+    // Update counts and refresh current view
+    await updateSavedCount();
+    
+    // Refresh the current tab view
+    if (listContent.classList.contains('active')) {
+      loadBookmarksList();
+    } else if (expiringContent.classList.contains('active')) {
+      loadExpiringBookmarksList();
+    }
+    
+  } catch (error) {
+    console.error('Error deleting bookmark:', error);
+    showStatus('Error deleting bookmark', 'error');
+  }
 }
 
 async function getFaviconUrl(url) {
