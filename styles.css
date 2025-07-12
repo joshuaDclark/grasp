@@ -447,7 +447,7 @@ textarea:focus, input:focus {
 /* Expiring bookmark cards */
 .bookmark-card.expiring {
   border-color: #ffc107;
-  background: #fff9e6;
+  background: #ffffff;
 }
 
 .bookmark-card.expiring:hover {
