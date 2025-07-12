@@ -436,18 +436,25 @@ async function loadBookmarksList() {
     const result = await chrome.storage.local.get(['bookmarks']);
     let bookmarks = result.bookmarks || [];
     
-    // Filter to show only active bookmarks (not expired, not expiring)
-    const activeBookmarks = bookmarks.filter(bookmark => {
+    // Filter to show all non-expired bookmarks (active + expiring)
+    const validBookmarks = bookmarks.filter(bookmark => {
       const status = getBookmarkStatus(bookmark);
-      return status === 'active';
+      return status !== 'expired';
     });
     
-    if (activeBookmarks.length === 0) {
-      bookmarksList.innerHTML = '<p class="no-bookmarks">No active saved pages.</p>';
+    if (validBookmarks.length === 0) {
+      bookmarksList.innerHTML = '<p class="no-bookmarks">No saved pages.</p>';
       return;
     }
     
-    renderBookmarks(activeBookmarks, bookmarksList);
+    // Sort by expiration date - expiring soonest first
+    const sortedBookmarks = validBookmarks.sort((a, b) => {
+      const daysA = getDaysUntilExpiration(a);
+      const daysB = getDaysUntilExpiration(b);
+      return daysA - daysB; // Ascending order (soonest first)
+    });
+    
+    renderBookmarks(sortedBookmarks, bookmarksList, false);
     
   } catch (error) {
     console.error('Error loading bookmarks:', error);
@@ -471,7 +478,14 @@ async function loadExpiringBookmarksList() {
       return;
     }
     
-    renderBookmarks(expiringBookmarks, expiringList, true);
+    // Sort by expiration date - expiring soonest first
+    const sortedExpiringBookmarks = expiringBookmarks.sort((a, b) => {
+      const daysA = getDaysUntilExpiration(a);
+      const daysB = getDaysUntilExpiration(b);
+      return daysA - daysB; // Ascending order (soonest first)
+    });
+    
+    renderBookmarks(sortedExpiringBookmarks, expiringList, true);
     
   } catch (error) {
     console.error('Error loading expiring bookmarks:', error);
@@ -481,7 +495,7 @@ async function loadExpiringBookmarksList() {
 
 function renderBookmarks(bookmarks, container, showExpiration = false) {
   let html = '';
-  bookmarks.reverse().forEach((bookmark, index) => {
+  bookmarks.forEach((bookmark, index) => {
     const faviconUrl = bookmark.favicon || `https://www.google.com/s2/favicons?domain=${new URL(bookmark.url).hostname}&sz=32`;
     const hasImage = bookmark.featuredImage && bookmark.featuredImage !== '';
     const status = getBookmarkStatus(bookmark);
