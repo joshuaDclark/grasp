@@ -15,9 +15,13 @@ const savedCountSpan = document.getElementById('saved-count');
 // Tab elements
 const saveTabBtn = document.getElementById('save-tab');
 const listTabBtn = document.getElementById('list-tab');
+const expiringTabBtn = document.getElementById('expiring-tab');
 const saveContent = document.getElementById('save-content');
 const listContent = document.getElementById('list-content');
+const expiringContent = document.getElementById('expiring-content');
 const bookmarksList = document.getElementById('bookmarks-list');
+const expiringList = document.getElementById('expiring-list');
+const expiringCountBadge = document.getElementById('expiring-count');
 
 // Preview elements
 const linkPreview = document.getElementById('link-preview');
@@ -30,6 +34,168 @@ const previewDescription = document.getElementById('preview-description');
 const previewAuthor = document.getElementById('preview-author');
 const previewDate = document.getElementById('preview-date');
 
+// Expiration constants
+const EXPIRATION_DAYS = 14;
+const EXPIRING_WARNING_DAYS = 3;
+
+// Expiration utility functions
+function calculateExpirationDate(timestamp) {
+  const saveDate = new Date(timestamp);
+  const expirationDate = new Date(saveDate);
+  expirationDate.setDate(saveDate.getDate() + EXPIRATION_DAYS);
+  return expirationDate.toISOString();
+}
+
+function getBookmarkStatus(bookmark) {
+  const now = new Date();
+  const saveDate = new Date(bookmark.timestamp);
+  const daysSinceSave = Math.floor((now - saveDate) / (1000 * 60 * 60 * 24));
+  
+  if (daysSinceSave >= EXPIRATION_DAYS) {
+    return 'expired';
+  } else if (daysSinceSave >= (EXPIRATION_DAYS - EXPIRING_WARNING_DAYS)) {
+    return 'expiring';
+  } else {
+    return 'active';
+  }
+}
+
+function getDaysUntilExpiration(bookmark) {
+  const now = new Date();
+  const saveDate = new Date(bookmark.timestamp);
+  const daysSinceSave = Math.floor((now - saveDate) / (1000 * 60 * 60 * 24));
+  return Math.max(0, EXPIRATION_DAYS - daysSinceSave);
+}
+
+function getDaysSinceSave(bookmark) {
+  const now = new Date();
+  const saveDate = new Date(bookmark.timestamp);
+  return Math.floor((now - saveDate) / (1000 * 60 * 60 * 24));
+}
+
+// Test data generator
+function generateTestBookmarks() {
+  const testBookmarks = [
+    // Fresh bookmarks (0-10 days old)
+    {
+      id: 'test-1',
+      title: 'Getting Started with React Hooks',
+      url: 'https://reactjs.org/docs/hooks-intro.html',
+      reason: 'Need to learn hooks for upcoming project',
+      tag: 'react',
+      timestamp: new Date(Date.now() - (2 * 24 * 60 * 60 * 1000)).toISOString(), // 2 days ago
+      favicon: 'https://www.google.com/s2/favicons?domain=reactjs.org&sz=32',
+      featuredImage: 'https://reactjs.org/logo-og.png',
+      description: 'Hooks are a new addition in React 16.8 that let you use state and other React features without writing a class.',
+      siteName: 'React',
+      contentType: 'article'
+    },
+    {
+      id: 'test-2',
+      title: 'CSS Grid Complete Guide',
+      url: 'https://css-tricks.com/snippets/css/complete-guide-grid/',
+      reason: 'Reference for responsive layouts',
+      tag: 'css',
+      timestamp: new Date(Date.now() - (5 * 24 * 60 * 60 * 1000)).toISOString(), // 5 days ago
+      favicon: 'https://www.google.com/s2/favicons?domain=css-tricks.com&sz=32',
+      featuredImage: 'https://css-tricks.com/wp-content/uploads/2018/11/css-grid-2.png',
+      description: 'CSS Grid Layout is the most powerful layout system available in CSS.',
+      siteName: 'CSS-Tricks'
+    },
+    {
+      id: 'test-3',
+      title: 'JavaScript Performance Optimization',
+      url: 'https://developer.mozilla.org/en-US/docs/Web/Performance',
+      reason: 'Optimize app performance',
+      tag: 'javascript',
+      timestamp: new Date(Date.now() - (8 * 24 * 60 * 60 * 1000)).toISOString(), // 8 days ago
+      favicon: 'https://www.google.com/s2/favicons?domain=developer.mozilla.org&sz=32',
+      description: 'Web performance is the objective measurement and perceived user experience of a website or application.',
+      siteName: 'MDN'
+    },
+    
+    // Expiring bookmarks (11-13 days old)
+    {
+      id: 'test-4',
+      title: 'Docker Best Practices',
+      url: 'https://docs.docker.com/develop/best-practices/',
+      reason: 'Setting up containerization for deployment',
+      tag: 'devops',
+      timestamp: new Date(Date.now() - (12 * 24 * 60 * 60 * 1000)).toISOString(), // 12 days ago
+      favicon: 'https://www.google.com/s2/favicons?domain=docs.docker.com&sz=32',
+      featuredImage: 'https://docs.docker.com/images/docker-logo.png',
+      description: 'This page contains recommendations and best practices for writing Dockerfiles.',
+      siteName: 'Docker Docs'
+    },
+    {
+      id: 'test-5',
+      title: 'API Security Checklist',
+      url: 'https://github.com/shieldfy/API-Security-Checklist',
+      reason: 'Security review for REST API',
+      tag: 'security',
+      timestamp: new Date(Date.now() - (13 * 24 * 60 * 60 * 1000)).toISOString(), // 13 days ago
+      favicon: 'https://www.google.com/s2/favicons?domain=github.com&sz=32',
+      description: 'Checklist of the most important security countermeasures when designing, testing, and releasing your API.',
+      siteName: 'GitHub'
+    },
+    
+    // Expired bookmarks (15+ days old)
+    {
+      id: 'test-6',
+      title: 'Old Tutorial - Outdated Framework',
+      url: 'https://example.com/old-tutorial',
+      reason: 'Was learning this framework but moved on',
+      tag: 'archived',
+      timestamp: new Date(Date.now() - (16 * 24 * 60 * 60 * 1000)).toISOString(), // 16 days ago
+      favicon: 'https://www.google.com/s2/favicons?domain=example.com&sz=32',
+      description: 'This tutorial is now outdated and should be removed.',
+      siteName: 'Example'
+    },
+    {
+      id: 'test-7',
+      title: 'Expired Conference Link',
+      url: 'https://oldconference.com/2024',
+      reason: 'Conference registration - already passed',
+      tag: 'events',
+      timestamp: new Date(Date.now() - (20 * 24 * 60 * 60 * 1000)).toISOString(), // 20 days ago
+      favicon: 'https://www.google.com/s2/favicons?domain=oldconference.com&sz=32',
+      description: 'Conference registration page - event has already passed.',
+      siteName: 'Old Conference'
+    }
+  ];
+  
+  return testBookmarks;
+}
+
+async function loadTestData() {
+  try {
+    const testBookmarks = generateTestBookmarks();
+    await chrome.storage.local.set({ bookmarks: testBookmarks });
+    showStatus('Test data loaded successfully!', 'success');
+    await updateSavedCount();
+    if (listContent.classList.contains('active')) {
+      loadBookmarksList();
+    }
+  } catch (error) {
+    console.error('Error loading test data:', error);
+    showStatus('Error loading test data', 'error');
+  }
+}
+
+async function clearAllBookmarks() {
+  try {
+    await chrome.storage.local.set({ bookmarks: [] });
+    showStatus('All bookmarks cleared!', 'success');
+    await updateSavedCount();
+    if (listContent.classList.contains('active')) {
+      loadBookmarksList();
+    }
+  } catch (error) {
+    console.error('Error clearing bookmarks:', error);
+    showStatus('Error clearing bookmarks', 'error');
+  }
+}
+
 // Initialize when DOM loads
 document.addEventListener('DOMContentLoaded', async () => {
   console.log('Grasp extension loaded');
@@ -37,6 +203,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   await updateSavedCount();
   setupEventListeners();
   setupPreviewListeners();
+  
+  // Add test data controls for development
+  addTestDataControls();
 });
 
 async function getCurrentTab() {
@@ -70,6 +239,7 @@ function setupEventListeners() {
   // Tab switching
   saveTabBtn.addEventListener('click', () => switchTab('save'));
   listTabBtn.addEventListener('click', () => switchTab('list'));
+  expiringTabBtn.addEventListener('click', () => switchTab('expiring'));
   
   // Keyboard shortcuts
   reasonTextarea.addEventListener('keydown', (e) => {
@@ -179,11 +349,62 @@ function resetForm() {
 async function updateSavedCount() {
   try {
     const result = await chrome.storage.local.get(['bookmarks']);
-    const bookmarks = result.bookmarks || [];
-    const count = bookmarks.length;
-    savedCountSpan.textContent = `${count} saved`;
+    let bookmarks = result.bookmarks || [];
+    
+    // Clean up expired bookmarks automatically
+    const cleanedBookmarks = await cleanupExpiredBookmarks(bookmarks);
+    
+    // Count bookmarks by status
+    const activeBooksmarks = cleanedBookmarks.filter(b => getBookmarkStatus(b) === 'active');
+    const expiringBookmarks = cleanedBookmarks.filter(b => getBookmarkStatus(b) === 'expiring');
+    
+    const totalCount = cleanedBookmarks.length;
+    const expiringCount = expiringBookmarks.length;
+    
+    savedCountSpan.textContent = `${totalCount} saved`;
+    
+    // Update expiring count badge
+    if (expiringCount > 0) {
+      expiringCountBadge.textContent = expiringCount;
+      expiringCountBadge.style.display = 'inline';
+      
+      // Show notification if there are expiring bookmarks
+      if (expiringCount > 0) {
+        showExpiringNotification(expiringCount);
+      }
+    } else {
+      expiringCountBadge.style.display = 'none';
+    }
+    
   } catch (error) {
     console.error('Error updating saved count:', error);
+  }
+}
+
+async function cleanupExpiredBookmarks(bookmarks) {
+  const validBookmarks = bookmarks.filter(bookmark => {
+    const status = getBookmarkStatus(bookmark);
+    return status !== 'expired';
+  });
+  
+  const expiredCount = bookmarks.length - validBookmarks.length;
+  
+  if (expiredCount > 0) {
+    // Save cleaned bookmarks back to storage
+    await chrome.storage.local.set({ bookmarks: validBookmarks });
+    showStatus(`Removed ${expiredCount} expired bookmark${expiredCount !== 1 ? 's' : ''}`, 'success');
+  }
+  
+  return validBookmarks;
+}
+
+function showExpiringNotification(count) {
+  // Only show notification once per session to avoid spam
+  if (!sessionStorage.getItem('expiringNotificationShown')) {
+    setTimeout(() => {
+      showStatus(`⚠️ ${count} bookmark${count !== 1 ? 's' : ''} expiring soon! Check the Expiring tab.`, 'error');
+    }, 1000);
+    sessionStorage.setItem('expiringNotificationShown', 'true');
   }
 }
 
@@ -191,8 +412,10 @@ function switchTab(tabName) {
   // Remove active class from all tabs and contents
   saveTabBtn.classList.remove('active');
   listTabBtn.classList.remove('active');
+  expiringTabBtn.classList.remove('active');
   saveContent.classList.remove('active');
   listContent.classList.remove('active');
+  expiringContent.classList.remove('active');
   
   if (tabName === 'save') {
     saveTabBtn.classList.add('active');
@@ -201,67 +424,115 @@ function switchTab(tabName) {
     listTabBtn.classList.add('active');
     listContent.classList.add('active');
     loadBookmarksList();
+  } else if (tabName === 'expiring') {
+    expiringTabBtn.classList.add('active');
+    expiringContent.classList.add('active');
+    loadExpiringBookmarksList();
   }
 }
 
 async function loadBookmarksList() {
   try {
     const result = await chrome.storage.local.get(['bookmarks']);
-    const bookmarks = result.bookmarks || [];
+    let bookmarks = result.bookmarks || [];
     
-    if (bookmarks.length === 0) {
-      bookmarksList.innerHTML = '<p class="no-bookmarks">No saved pages yet.</p>';
+    // Filter to show only active bookmarks (not expired, not expiring)
+    const activeBookmarks = bookmarks.filter(bookmark => {
+      const status = getBookmarkStatus(bookmark);
+      return status === 'active';
+    });
+    
+    if (activeBookmarks.length === 0) {
+      bookmarksList.innerHTML = '<p class="no-bookmarks">No active saved pages.</p>';
       return;
     }
     
-    let html = '';
-    bookmarks.reverse().forEach((bookmark, index) => {
-      const faviconUrl = bookmark.favicon || `https://www.google.com/s2/favicons?domain=${new URL(bookmark.url).hostname}&sz=32`;
-      const hasImage = bookmark.featuredImage && bookmark.featuredImage !== '';
-      
-      html += `
-        <div class="bookmark-card" 
-             data-bookmark-index="${index}">
-          ${hasImage ? `<div class="bookmark-image" style="background-image: url('${bookmark.featuredImage}')"></div>` : ''}
-          <div class="bookmark-content">
-            <div class="bookmark-header">
-              <img src="${faviconUrl}" class="bookmark-favicon" alt="Site icon">
-              <div class="bookmark-meta">
-                <h4 class="bookmark-title">${bookmark.title}</h4>
-                <small class="bookmark-date">${new Date(bookmark.timestamp).toLocaleDateString()}</small>
-              </div>
-            </div>
-            <p class="bookmark-reason">${bookmark.reason}</p>
-            ${bookmark.tag ? `<span class="bookmark-tag">${bookmark.tag}</span>` : ''}
-          </div>
-        </div>
-      `;
-    });
-    
-    bookmarksList.innerHTML = html;
-    
-    // Add event listeners for previews and clicks
-    const bookmarkCards = bookmarksList.querySelectorAll('.bookmark-card');
-    bookmarkCards.forEach((card, index) => {
-      const bookmark = bookmarks[index];
-      
-      card.addEventListener('click', () => {
-        openBookmark(bookmark.url);
-      });
-      
-      card.addEventListener('mouseenter', (e) => {
-        showLinkPreview(bookmark, e.currentTarget);
-      });
-      
-      card.addEventListener('mouseleave', () => {
-        hideLinkPreview();
-      });
-    });
+    renderBookmarks(activeBookmarks, bookmarksList);
     
   } catch (error) {
     console.error('Error loading bookmarks:', error);
     bookmarksList.innerHTML = '<p class="error">Error loading saved pages.</p>';
   }
+}
+
+async function loadExpiringBookmarksList() {
+  try {
+    const result = await chrome.storage.local.get(['bookmarks']);
+    let bookmarks = result.bookmarks || [];
+    
+    // Filter to show only expiring bookmarks
+    const expiringBookmarks = bookmarks.filter(bookmark => {
+      const status = getBookmarkStatus(bookmark);
+      return status === 'expiring';
+    });
+    
+    if (expiringBookmarks.length === 0) {
+      expiringList.innerHTML = '<p class="no-expiring">No expiring links.</p>';
+      return;
+    }
+    
+    renderBookmarks(expiringBookmarks, expiringList, true);
+    
+  } catch (error) {
+    console.error('Error loading expiring bookmarks:', error);
+    expiringList.innerHTML = '<p class="error">Error loading expiring pages.</p>';
+  }
+}
+
+function renderBookmarks(bookmarks, container, showExpiration = false) {
+  let html = '';
+  bookmarks.reverse().forEach((bookmark, index) => {
+    const faviconUrl = bookmark.favicon || `https://www.google.com/s2/favicons?domain=${new URL(bookmark.url).hostname}&sz=32`;
+    const hasImage = bookmark.featuredImage && bookmark.featuredImage !== '';
+    const status = getBookmarkStatus(bookmark);
+    const daysUntilExpiration = getDaysUntilExpiration(bookmark);
+    const daysSinceSave = getDaysSinceSave(bookmark);
+    
+    let statusIndicator = '';
+    if (showExpiration || status === 'expiring') {
+      statusIndicator = `<div class="expiration-warning">⚠️ Expires in ${daysUntilExpiration} day${daysUntilExpiration !== 1 ? 's' : ''}</div>`;
+    }
+    
+    html += `
+      <div class="bookmark-card ${status === 'expiring' ? 'expiring' : ''}" 
+           data-bookmark-index="${index}"
+           data-status="${status}">
+        ${hasImage ? `<div class="bookmark-image" style="background-image: url('${bookmark.featuredImage}')"></div>` : ''}
+        <div class="bookmark-content">
+          <div class="bookmark-header">
+            <img src="${faviconUrl}" class="bookmark-favicon" alt="Site icon">
+            <div class="bookmark-meta">
+              <h4 class="bookmark-title">${bookmark.title}</h4>
+              <small class="bookmark-date">${new Date(bookmark.timestamp).toLocaleDateString()} (${daysSinceSave} days ago)</small>
+            </div>
+          </div>
+          ${statusIndicator}
+          <p class="bookmark-reason">${bookmark.reason}</p>
+          ${bookmark.tag ? `<span class="bookmark-tag">${bookmark.tag}</span>` : ''}
+        </div>
+      </div>
+    `;
+  });
+  
+  container.innerHTML = html;
+  
+  // Add event listeners for previews and clicks
+  const bookmarkCards = container.querySelectorAll('.bookmark-card');
+  bookmarkCards.forEach((card, index) => {
+    const bookmark = bookmarks[index];
+    
+    card.addEventListener('click', () => {
+      openBookmark(bookmark.url);
+    });
+    
+    card.addEventListener('mouseenter', (e) => {
+      showLinkPreview(bookmark, e.currentTarget);
+    });
+    
+    card.addEventListener('mouseleave', () => {
+      hideLinkPreview();
+    });
+  });
 }
 
 function openBookmark(url) {
@@ -448,4 +719,26 @@ function setupPreviewListeners() {
       hideLinkPreview();
     }
   });
+}
+
+function addTestDataControls() {
+  // Add test data control buttons for development
+  const container = document.querySelector('.container');
+  const testControls = document.createElement('div');
+  testControls.className = 'test-controls';
+  testControls.style.cssText = 'margin-top: 10px; display: flex; gap: 5px; font-size: 11px;';
+  
+  const loadTestBtn = document.createElement('button');
+  loadTestBtn.textContent = 'Load Test Data';
+  loadTestBtn.style.cssText = 'padding: 4px 8px; font-size: 10px; background: #28a745; color: white; border: none; border-radius: 3px; cursor: pointer;';
+  loadTestBtn.addEventListener('click', loadTestData);
+  
+  const clearBtn = document.createElement('button');
+  clearBtn.textContent = 'Clear All';
+  clearBtn.style.cssText = 'padding: 4px 8px; font-size: 10px; background: #dc3545; color: white; border: none; border-radius: 3px; cursor: pointer;';
+  clearBtn.addEventListener('click', clearAllBookmarks);
+  
+  testControls.appendChild(loadTestBtn);
+  testControls.appendChild(clearBtn);
+  container.appendChild(testControls);
 }

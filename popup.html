@@ -19,6 +19,7 @@
     <div class="tab-nav">
       <button id="save-tab" class="tab-btn active">Save Page</button>
       <button id="list-tab" class="tab-btn">List</button>
+      <button id="expiring-tab" class="tab-btn">Expiring <span id="expiring-count" class="expiring-badge" style="display: none;">0</span></button>
     </div>
 
     <!-- Save Page Tab Content -->
@@ -34,8 +35,8 @@
       <form id="save-form" class="save-form">
         <div class="form-group">
           <label for="reason">Why are you saving this? *</label>
-          <textarea 
-            id="reason" 
+          <textarea
+            id="reason"
             placeholder="Enter your reason..."
             required>
           </textarea>
@@ -62,6 +63,17 @@
     <div id="list-content" class="tab-content">
       <div id="bookmarks-list" class="bookmarks-list">
         <p class="no-bookmarks">No saved pages yet.</p>
+      </div>
+    </div>
+
+    <!-- Expiring Tab Content -->
+    <div id="expiring-content" class="tab-content">
+      <div class="expiring-info">
+        <h3>⚠️ Links Expiring Soon</h3>
+        <p>These links will expire in 3 days or less. Take action before they're automatically removed!</p>
+      </div>
+      <div id="expiring-list" class="bookmarks-list">
+        <p class="no-expiring">No expiring links.</p>
       </div>
     </div>
 

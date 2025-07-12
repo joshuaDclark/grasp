@@ -414,3 +414,81 @@ textarea:focus, input:focus {
 .preview-date {
   font-style: italic;
 }
+
+/* Expiring Links Styling */
+.expiring-info {
+  background: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 16px;
+}
+
+.expiring-info h3 {
+  font-size: 14px;
+  color: #856404;
+  margin: 0 0 6px 0;
+}
+
+.expiring-info p {
+  font-size: 12px;
+  color: #856404;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.no-expiring {
+  text-align: center;
+  color: #666;
+  font-style: italic;
+  padding: 20px;
+}
+
+/* Expiring bookmark cards */
+.bookmark-card.expiring {
+  border-color: #ffc107;
+  background: #fff9e6;
+}
+
+.bookmark-card.expiring:hover {
+  border-color: #e0a800;
+  box-shadow: 0 2px 8px rgba(255, 193, 7, 0.3);
+}
+
+.expiration-warning {
+  background: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeaa7;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  margin: 8px 0;
+  text-align: center;
+}
+
+/* Expiring count badge */
+.expiring-badge {
+  background: #dc3545;
+  color: white;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 10px;
+  margin-left: 4px;
+  min-width: 16px;
+  text-align: center;
+}
+
+/* Tab button styling for expiring tab */
+.tab-btn:has(.expiring-badge) {
+position: relative;
+  display: flex;
+
+}
+
+/* Test controls styling */
+.test-controls {
+  border-top: 1px solid #e0e0e0;
+  padding-top: 10px;
+}
