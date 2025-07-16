@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Grasp - Save Web Content",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Capture and save web pages with reasons and tags",
   "permissions": [
     "activeTab",
