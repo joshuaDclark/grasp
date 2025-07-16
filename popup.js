@@ -77,30 +77,7 @@ function getDaysSinceSave(bookmark) {
 // Test data generator
 function generateTestBookmarks() {
   const testBookmarks = [
-    // Fresh bookmarks (0-10 days old)
-    {
-      id: 'test-1',
-      title: 'Getting Started with React Hooks',
-      url: 'https://reactjs.org/docs/hooks-intro.html',
-      tag: 'react',
-      timestamp: new Date(Date.now() - (2 * 24 * 60 * 60 * 1000)).toISOString(), // 2 days ago
-      favicon: 'https://www.google.com/s2/favicons?domain=reactjs.org&sz=32',
-      featuredImage: 'https://reactjs.org/logo-og.png',
-      description: 'Hooks are a new addition in React 16.8 that let you use state and other React features without writing a class.',
-      siteName: 'React',
-      contentType: 'article'
-    },
-    {
-      id: 'test-2',
-      title: 'CSS Grid Complete Guide',
-      url: 'https://css-tricks.com/snippets/css/complete-guide-grid/',
-      tag: 'css',
-      timestamp: new Date(Date.now() - (5 * 24 * 60 * 60 * 1000)).toISOString(), // 5 days ago
-      favicon: 'https://www.google.com/s2/favicons?domain=css-tricks.com&sz=32',
-      featuredImage: 'https://css-tricks.com/wp-content/uploads/2018/11/css-grid-2.png',
-      description: 'CSS Grid Layout is the most powerful layout system available in CSS.',
-      siteName: 'CSS-Tricks'
-    },
+    // Fresh bookmarks (active)
     {
       id: 'test-grasp',
       title: 'Grasp - Chrome Extension for Saving Links',
@@ -114,59 +91,28 @@ function generateTestBookmarks() {
       contentType: 'repository'
     },
     {
-      id: 'test-3',
-      title: 'JavaScript Performance Optimization',
-      url: 'https://developer.mozilla.org/en-US/docs/Web/Performance',
-      tag: 'javascript',
-      timestamp: new Date(Date.now() - (8 * 24 * 60 * 60 * 1000)).toISOString(), // 8 days ago
-      favicon: 'https://www.google.com/s2/favicons?domain=developer.mozilla.org&sz=32',
-      description: 'Web performance is the objective measurement and perceived user experience of a website or application.',
-      siteName: 'MDN'
+      id: 'test-1',
+      title: 'CSS Grid Complete Guide',
+      url: 'https://css-tricks.com/snippets/css/complete-guide-grid/',
+      tag: 'css, web-development',
+      timestamp: new Date(Date.now() - (3 * 24 * 60 * 60 * 1000)).toISOString(), // 3 days ago
+      favicon: 'https://www.google.com/s2/favicons?domain=css-tricks.com&sz=32',
+      featuredImage: 'https://css-tricks.com/wp-content/uploads/2018/11/css-grid-2.png',
+      description: 'CSS Grid Layout is the most powerful layout system available in CSS. Learn everything you need to know about CSS Grid.',
+      siteName: 'CSS-Tricks'
     },
     
-    // Expiring bookmarks (11-13 days old)
+    // Expiring bookmark
     {
-      id: 'test-4',
-      title: 'Docker Best Practices',
+      id: 'test-expiring',
+      title: 'Docker Best Practices Guide',
       url: 'https://docs.docker.com/develop/best-practices/',
-      tag: 'devops',
-      timestamp: new Date(Date.now() - (12 * 24 * 60 * 60 * 1000)).toISOString(), // 12 days ago
+      tag: 'devops, docker',
+      timestamp: new Date(Date.now() - (12 * 24 * 60 * 60 * 1000)).toISOString(), // 12 days ago (expiring)
       favicon: 'https://www.google.com/s2/favicons?domain=docs.docker.com&sz=32',
       featuredImage: 'https://docs.docker.com/images/docker-logo.png',
-      description: 'This page contains recommendations and best practices for writing Dockerfiles.',
+      description: 'This page contains recommendations and best practices for writing Dockerfiles and building efficient Docker images.',
       siteName: 'Docker Docs'
-    },
-    {
-      id: 'test-5',
-      title: 'API Security Checklist',
-      url: 'https://github.com/shieldfy/API-Security-Checklist',
-      tag: 'security',
-      timestamp: new Date(Date.now() - (13 * 24 * 60 * 60 * 1000)).toISOString(), // 13 days ago
-      favicon: 'https://www.google.com/s2/favicons?domain=github.com&sz=32',
-      description: 'Checklist of the most important security countermeasures when designing, testing, and releasing your API.',
-      siteName: 'GitHub'
-    },
-    
-    // Expired bookmarks (15+ days old)
-    {
-      id: 'test-6',
-      title: 'Old Tutorial - Outdated Framework',
-      url: 'https://example.com/old-tutorial',
-      tag: 'archived',
-      timestamp: new Date(Date.now() - (16 * 24 * 60 * 60 * 1000)).toISOString(), // 16 days ago
-      favicon: 'https://www.google.com/s2/favicons?domain=example.com&sz=32',
-      description: 'This tutorial is now outdated and should be removed.',
-      siteName: 'Example'
-    },
-    {
-      id: 'test-7',
-      title: 'Expired Conference Link',
-      url: 'https://oldconference.com/2024',
-      tag: 'events',
-      timestamp: new Date(Date.now() - (20 * 24 * 60 * 60 * 1000)).toISOString(), // 20 days ago
-      favicon: 'https://www.google.com/s2/favicons?domain=oldconference.com&sz=32',
-      description: 'Conference registration page - event has already passed.',
-      siteName: 'Old Conference'
     }
   ];
   
