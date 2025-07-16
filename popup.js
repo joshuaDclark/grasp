@@ -102,6 +102,18 @@ function generateTestBookmarks() {
       siteName: 'CSS-Tricks'
     },
     {
+      id: 'test-grasp',
+      title: 'Grasp - Chrome Extension for Saving Links',
+      url: 'https://github.com/joshuaDclark/grasp',
+      tag: 'chrome-extension, productivity',
+      timestamp: new Date(Date.now() - (1 * 24 * 60 * 60 * 1000)).toISOString(), // 1 day ago
+      favicon: 'https://www.google.com/s2/favicons?domain=github.com&sz=32',
+      featuredImage: 'https://opengraph.githubassets.com/1/joshuaDclark/grasp',
+      description: 'A Chrome browser extension for saving web pages with contextual notes and tags. Captures enhanced metadata including featured images, descriptions, and article metadata for rich previews.',
+      siteName: 'GitHub',
+      contentType: 'repository'
+    },
+    {
       id: 'test-3',
       title: 'JavaScript Performance Optimization',
       url: 'https://developer.mozilla.org/en-US/docs/Web/Performance',
@@ -161,32 +173,21 @@ function generateTestBookmarks() {
   return testBookmarks;
 }
 
-async function loadTestData() {
+async function initializeExtension() {
   try {
-    const testBookmarks = generateTestBookmarks();
-    await chrome.storage.local.set({ bookmarks: testBookmarks });
-    showStatus('Test data loaded successfully!', 'success');
-    await updateSavedCount();
-    if (listContent.classList.contains('active')) {
-      loadBookmarksList();
+    const result = await chrome.storage.local.get(['bookmarks', 'initialized']);
+    
+    // Only load test data if extension hasn't been initialized before
+    if (!result.initialized) {
+      const testBookmarks = generateTestBookmarks();
+      await chrome.storage.local.set({ 
+        bookmarks: testBookmarks,
+        initialized: true 
+      });
+      console.log('Extension initialized with test data');
     }
   } catch (error) {
-    console.error('Error loading test data:', error);
-    showStatus('Error loading test data', 'error');
-  }
-}
-
-async function clearAllBookmarks() {
-  try {
-    await chrome.storage.local.set({ bookmarks: [] });
-    showStatus('All bookmarks cleared!', 'success');
-    await updateSavedCount();
-    if (listContent.classList.contains('active')) {
-      loadBookmarksList();
-    }
-  } catch (error) {
-    console.error('Error clearing bookmarks:', error);
-    showStatus('Error clearing bookmarks', 'error');
+    console.error('Error initializing extension:', error);
   }
 }
 
@@ -194,12 +195,10 @@ async function clearAllBookmarks() {
 document.addEventListener('DOMContentLoaded', async () => {
   console.log('Grasp extension loaded');
   await getCurrentTab();
+  await initializeExtension();
   await updateSavedCount();
   setupEventListeners();
   setupPreviewListeners();
-  
-  // Add test data controls for development
-  addTestDataControls();
 });
 
 async function getCurrentTab() {
@@ -865,26 +864,4 @@ function setupPreviewListeners() {
       hideLinkPreview();
     }
   });
-}
-
-function addTestDataControls() {
-  // Add test data control buttons for development
-  const container = document.querySelector('.container');
-  const testControls = document.createElement('div');
-  testControls.className = 'test-controls';
-  testControls.style.cssText = 'margin-top: 10px; display: flex; gap: 5px; font-size: 11px;';
-  
-  const loadTestBtn = document.createElement('button');
-  loadTestBtn.textContent = 'Load Test Data';
-  loadTestBtn.style.cssText = 'padding: 4px 8px; font-size: 10px; background: #28a745; color: white; border: none; border-radius: 3px; cursor: pointer;';
-  loadTestBtn.addEventListener('click', loadTestData);
-  
-  const clearBtn = document.createElement('button');
-  clearBtn.textContent = 'Clear All';
-  clearBtn.style.cssText = 'padding: 4px 8px; font-size: 10px; background: #dc3545; color: white; border: none; border-radius: 3px; cursor: pointer;';
-  clearBtn.addEventListener('click', clearAllBookmarks);
-  
-  testControls.appendChild(loadTestBtn);
-  testControls.appendChild(clearBtn);
-  container.appendChild(testControls);
 }
