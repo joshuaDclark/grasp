@@ -19,7 +19,7 @@ Grasp isn’t about hoarding. It’s about giving you a chance to follow through
 
 ## Installation
 
-1. [Download](https://github.com/joshuaDclark/grasp/archive/refs/tags/1.0.0.zip) the zip package of this repository.
+1. [Download](https://github.com/joshuaDclark/grasp/archive/refs/heads/main.zip) the zip package of this repository.
 2. Open Chrome and navigate to `chrome://extensions/`
 3. Enable "Developer mode" (top right toggle)
 4. Click "Load unpacked" and select the extension directory
